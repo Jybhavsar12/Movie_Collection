@@ -236,15 +236,21 @@ npm start    # Standard production start
 ## Screenshots
 
 ### Home Page
+![answer 2025-12-02 at 11 52 02 AM](https://github.com/user-attachments/assets/cf9de4d1-6326-455c-8cb9-cef798fb8d19)
 Beautiful movie grid with responsive cards and ratings
 
 ### Movie Details
+![answer 2025-12-02 at 11 52 09 AM](https://github.com/user-attachments/assets/25bbdf83-8e63-45b1-bf7f-9541bc049881)
 Comprehensive movie information with edit/delete options
 
 ### Add/Edit Movie
+![answer 2025-12-02 at 11 52 40 AM](https://github.com/user-attachments/assets/564dc67a-0e13-4980-82b5-219eecf37fc0)
+
 User-friendly forms with validation and error handling
 
 ### Authentication
+![answer 2025-12-02 at 11 52 19 AM](https://github.com/user-attachments/assets/2239b5f5-36cb-4f43-bd1f-1252f4570928)
+
 Secure login and registration system
 
 ---
