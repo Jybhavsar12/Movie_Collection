@@ -54,25 +54,31 @@ app.get('/', (req, res) => {
   res.redirect('/movies');
 });
 
-// SSL Certificate options
-const sslOptions = {
-  key: fs.readFileSync('private-key.pem'),
-  cert: fs.readFileSync('certificate.pem')
-};
-
-// Create HTTPS server
-const httpsServer = https.createServer(sslOptions, app);
+// SSL Certificate options - only for local development
+let httpsServer;
+if (process.env.NODE_ENV !== 'production') {
+  const sslOptions = {
+    key: fs.readFileSync('private-key.pem'),
+    cert: fs.readFileSync('certificate.pem')
+  };
+  httpsServer = https.createServer(sslOptions, app);
+}
 
 const PORT = process.env.PORT || 3000;
-const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
-// Start HTTPS server
-httpsServer.listen(HTTPS_PORT, () => {
-  console.log(`🔒 HTTPS Server running on https://localhost:${HTTPS_PORT}`);
-});
-
-// Optional: Keep HTTP server for redirects
-app.listen(PORT, () => {
-  console.log(`🌐 HTTP Server running on http://localhost:${PORT}`);
-  console.log(`🔒 HTTPS Server running on https://localhost:${HTTPS_PORT}`);
-});
+// Start server
+if (process.env.NODE_ENV === 'production') {
+  app.listen(PORT, () => {
+    console.log(`🌐 Server running on port ${PORT}`);
+  });
+} else {
+  // Local development with HTTPS
+  const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
+  httpsServer.listen(HTTPS_PORT, () => {
+    console.log(`🔒 HTTPS Server running on https://localhost:${HTTPS_PORT}`);
+  });
+  
+  app.listen(PORT, () => {
+    console.log(`🌐 HTTP Server running on http://localhost:${PORT}`);
+  });
+}

@@ -1,0 +1,7 @@
+{
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "SESSION_SECRET": "@session_secret",
+    "NODE_ENV": "production"
+  }
+}
