@@ -18,6 +18,7 @@ A full-stack web application for managing your personal movie collection with us
 - **Genre Categories** - Organize movies by genre
 - **User Ownership** - Users can only edit their own movies
 - **Movie Details** - Detailed view with poster, description, and metadata
+- **Dark/Light Theme Toggle** - Switch between elegant dark and red/white light themes
 
 ## Quick Start
 
@@ -118,6 +119,7 @@ Movie_Collection/
 - **Bootstrap 5** - CSS framework
 - **Font Awesome** - Icons
 - **Responsive Design** - Mobile-first approach
+- **Theme Toggle** - Dark/Light mode with localStorage persistence
 
 ### Security
 - **HTTPS/SSL** - Secure connections
