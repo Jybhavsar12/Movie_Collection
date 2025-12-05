@@ -141,4 +141,19 @@ router.delete('/:id', requireAuth, requireOwnership, async (req, res) => {
   }
 });
 
+// GET movies by genre
+router.get('/genre/:genre', async (req, res) => {
+  try {
+    const genre = req.params.genre;
+    const movies = await Movie.find({ genres: genre }).populate('addedBy', 'username');
+    res.render('movies/index', { 
+      movies, 
+      pageTitle: `${genre} Movies`,
+      currentGenre: genre 
+    });
+  } catch (error) {
+    res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;

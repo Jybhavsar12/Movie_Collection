@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cinémathèque - Premium Movie Collection</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <meta name="description" content="A sophisticated movie collection platform">
@@ -16,6 +18,9 @@
                     <i class="fas fa-film"></i> Cinémathèque
                 </a>
                 <div class="navbar-nav">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-sun"></i>
+                    </button>
                     <% if (user) { %>
                         <span class="navbar-text">Welcome back, <%= user.username %></span>
                         <a class="nav-link" href="/movies/add">

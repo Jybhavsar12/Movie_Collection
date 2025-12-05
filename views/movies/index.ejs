@@ -1,7 +1,17 @@
 <%- include('../partials/header') %>
 
 <div class="page-header">
-    <h1 class="page-title"><i class="fas fa-film"></i> Movies Collection</h1>
+    <h1 class="page-title">
+        <i class="fas fa-film"></i> 
+        <%= typeof pageTitle !== 'undefined' ? pageTitle : 'Movies Collection' %>
+    </h1>
+    <% if (typeof currentGenre !== 'undefined') { %>
+        <p class="page-subtitle">
+            <a href="/movies" class="btn btn-outline btn-sm">
+                <i class="fas fa-arrow-left"></i> All Movies
+            </a>
+        </p>
+    <% } %>
     <% if (user) { %>
         <a href="/movies/add" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add New Movie
@@ -12,7 +22,7 @@
 <% if (movies.length === 0) { %>
     <div class="empty-state">
         <i class="fas fa-film"></i>
-        <h3>No movies found</h3>
+        <h3>No <%= typeof currentGenre !== 'undefined' ? currentGenre.toLowerCase() : '' %> movies found</h3>
         <% if (user) { %>
             <a href="/movies/add" class="btn btn-primary mt-3">Add the first movie</a>
         <% } %>
@@ -31,7 +41,9 @@
                     </div>
                     <div class="genres">
                         <% movie.genres.forEach(genre => { %>
-                            <span class="badge"><%= genre %></span>
+                            <a href="/movies/genre/<%= encodeURIComponent(genre) %>" class="badge genre-link">
+                                <%= genre %>
+                            </a>
                         <% }) %>
                     </div>
                     <div class="rating">
