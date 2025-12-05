@@ -15,30 +15,46 @@
         <div class="container">
             <div class="navbar-content">
                 <a class="navbar-brand" href="/movies">
-                    <i class="fas fa-film"></i> Cinémathèque
+                    <i class="fas fa-film"></i> 
+                    <span>Cinémathèque</span>
                 </a>
-                <div class="navbar-nav">
-                    <button class="theme-toggle" id="themeToggle">
-                        <i class="fas fa-sun"></i>
-                    </button>
+                
+                <!-- Mobile menu toggle -->
+                <button class="navbar-toggle" id="navbarToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                
+                <div class="navbar-nav" id="navbarNav">
+                    <a class="nav-link" href="/movies">
+                        <i class="fas fa-film"></i> Movies
+                    </a>
                     <% if (user) { %>
-                        <span class="navbar-text">Welcome back, <%= user.username %></span>
+                        <span class="navbar-text">
+                            <i class="fas fa-user"></i> <%= user.username %>
+                        </span>
                         <a class="nav-link" href="/movies/add">
-                            <i class="fas fa-plus-circle"></i> Curate Film
+                            <i class="fas fa-plus"></i> Add Movie
                         </a>
-                        <form action="/auth/logout" method="POST" style="display: inline;">
-                            <button type="submit" class="btn btn-outline btn-sm">
-                                <i class="fas fa-sign-out-alt"></i> Sign Out
+                        <form action="/auth/logout" method="POST" class="nav-form">
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> Logout
                             </button>
                         </form>
                     <% } else { %>
                         <a class="nav-link" href="/auth/login">
-                            <i class="fas fa-key"></i> Access
+                            <i class="fas fa-sign-in-alt"></i> Login
                         </a>
                         <a class="nav-link" href="/auth/register">
-                            <i class="fas fa-user-crown"></i> Join
+                            <i class="fas fa-user-plus"></i> Register
                         </a>
                     <% } %>
+                    
+                    <!-- Theme toggle -->
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        <i class="fas fa-sun"></i>
+                    </button>
                 </div>
             </div>
         </div>

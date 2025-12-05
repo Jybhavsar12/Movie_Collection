@@ -205,6 +205,34 @@ document.addEventListener('DOMContentLoaded', function() {
         lastScrollTop = scrollTop;
     });
 
+    // Mobile Navigation Toggle
+    const navbarToggle = document.getElementById('navbarToggle');
+    const navbarNav = document.getElementById('navbarNav');
+
+    if (navbarToggle && navbarNav) {
+        navbarToggle.addEventListener('click', () => {
+            navbarToggle.classList.toggle('active');
+            navbarNav.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navbarToggle.contains(e.target) && !navbarNav.contains(e.target)) {
+                navbarToggle.classList.remove('active');
+                navbarNav.classList.remove('active');
+            }
+        });
+
+        // Close mobile menu when clicking on a link
+        const navLinks = navbarNav.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navbarToggle.classList.remove('active');
+                navbarNav.classList.remove('active');
+            });
+        });
+    }
+
     // Particle effect on hover for special elements
     function createParticles(element) {
         const particles = [];

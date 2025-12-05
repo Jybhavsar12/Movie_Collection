@@ -2,19 +2,26 @@ const express = require('express');
 const session = require('express-session');
 const methodOverride = require('method-override');
 const path = require('path');
-const https = require('https');
-const fs = require('fs');
 
 // Load environment variables
 require('dotenv').config();
+
+const app = express();
+
+// Error handling for missing environment variables
+if (!process.env.MONGODB_URI) {
+  console.error('MONGODB_URI environment variable is missing');
+}
+
+if (!process.env.SESSION_SECRET) {
+  console.error('SESSION_SECRET environment variable is missing');
+}
 
 // Import database connection
 const connectDB = require('./config/database');
 
 const movieRoutes = require('./routes/movies');
 const authRoutes = require('./routes/auth');
-
-const app = express();
 
 // Connect to Database
 connectDB();
@@ -29,14 +36,15 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static('public'));
 
-// Session middleware
+// Session middleware - Updated for production
 app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: false, // Set to false for now to test
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true
   }
 }));
 
@@ -54,31 +62,14 @@ app.get('/', (req, res) => {
   res.redirect('/movies');
 });
 
-// SSL Certificate options - only for local development
-let httpsServer;
-if (process.env.NODE_ENV !== 'production') {
-  const sslOptions = {
-    key: fs.readFileSync('private-key.pem'),
-    cert: fs.readFileSync('certificate.pem')
-  };
-  httpsServer = https.createServer(sslOptions, app);
-}
-
 const PORT = process.env.PORT || 3000;
 
-// Start server
-if (process.env.NODE_ENV === 'production') {
+// Only start server if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`🌐 Server running on port ${PORT}`);
-  });
-} else {
-  // Local development with HTTPS
-  const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
-  httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`🔒 HTTPS Server running on https://localhost:${HTTPS_PORT}`);
-  });
-  
-  app.listen(PORT, () => {
-    console.log(`🌐 HTTP Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
 }
+
+// Export for Vercel
+module.exports = app;

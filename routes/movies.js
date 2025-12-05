@@ -1,7 +1,17 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Movie = require('../models/Movie');
+const mongoose = require('mongoose');
 const router = express.Router();
+
+// Helper function to ensure DB connection
+const ensureConnection = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    console.log('Database not connected, attempting to reconnect...');
+    const connectDB = require('../config/database');
+    await connectDB();
+  }
+};
 
 // Middleware to check if user is logged in
 const requireAuth = (req, res, next) => {
@@ -31,9 +41,91 @@ const requireOwnership = async (req, res, next) => {
 // GET all movies
 router.get('/', async (req, res) => {
   try {
-    const movies = await Movie.find().populate('addedBy', 'username');
-    res.render('movies/index', { movies });
+    await ensureConnection();
+    const movies = await Movie.find()
+      .populate('addedBy', 'username')
+      .maxTimeMS(10000)
+      .exec();
+    
+    let recommendations = [];
+    
+    // Get recommendations for logged-in users
+    if (req.session.user) {
+      try {
+        console.log('=== RECOMMENDATIONS DEBUG ===');
+        console.log('User logged in:', req.session.user.username);
+        console.log('User ID:', req.session.user._id);
+        
+        // Check total movies in database
+        const totalMovies = await Movie.countDocuments();
+        console.log('Total movies in database:', totalMovies);
+        
+        // Check movies by other users
+        const otherUsersMovies = await Movie.countDocuments({ addedBy: { $ne: req.session.user._id } });
+        console.log('Movies by other users:', otherUsersMovies);
+        
+        const userMovies = await Movie.find({ addedBy: req.session.user._id });
+        console.log('User has', userMovies.length, 'movies');
+        
+        if (userMovies.length > 0) {
+          const userGenres = [...new Set(userMovies.flatMap(movie => movie.genres))];
+          console.log('User genres:', userGenres);
+          
+          // Try the most basic recommendation first - any movie by other users
+          recommendations = await Movie.find({
+            addedBy: { $ne: req.session.user._id }
+          })
+          .populate('addedBy', 'username')
+          .sort({ rating: -1 })
+          .limit(6);
+          
+          console.log('Basic recommendations (any movie by others):', recommendations.length);
+          
+          // Log the actual movies found
+          if (recommendations.length > 0) {
+            console.log('Recommended movies:');
+            recommendations.forEach((movie, index) => {
+              console.log(`${index + 1}. ${movie.name} (${movie.rating}/10) by ${movie.addedBy.username}`);
+            });
+          }
+        } else {
+          console.log('User has no movies, trying to show any movies by others');
+          
+          // Show any movies by other users
+          recommendations = await Movie.find({
+            addedBy: { $ne: req.session.user._id }
+          })
+          .populate('addedBy', 'username')
+          .sort({ rating: -1 })
+          .limit(6);
+          
+          console.log('Fallback recommendations:', recommendations.length);
+          
+          // Log the actual movies found
+          if (recommendations.length > 0) {
+            console.log('Fallback recommended movies:');
+            recommendations.forEach((movie, index) => {
+              console.log(`${index + 1}. ${movie.name} (${movie.rating}/10) by ${movie.addedBy.username}`);
+            });
+          }
+        }
+        
+        console.log('Final recommendations count:', recommendations.length);
+        console.log('=== END DEBUG ===');
+        
+      } catch (recError) {
+        console.log('Recommendations error:', recError);
+      }
+    } else {
+      console.log('No user session found');
+    }
+    
+    res.render('movies/index', { movies, recommendations });
   } catch (error) {
+    console.error('Movies fetch error:', error);
+    if (error.message.includes('timed out')) {
+      return res.status(503).send('Database timeout. Please try again.');
+    }
     res.status(500).send('Server error');
   }
 });
@@ -153,6 +245,40 @@ router.get('/genre/:genre', async (req, res) => {
     });
   } catch (error) {
     res.status(500).send('Server error');
+  }
+});
+
+// Add this route for recommendations
+router.get('/recommendations', requireAuth, async (req, res) => {
+  try {
+    // Get user's movies to analyze preferences
+    const userMovies = await Movie.find({ addedBy: req.session.user._id }).populate('addedBy');
+    
+    // Extract user's preferred genres
+    const userGenres = [...new Set(userMovies.flatMap(movie => movie.genres))];
+    
+    // Find movies from other users in similar genres
+    const recommendations = await Movie.find({
+      addedBy: { $ne: req.session.user._id },
+      genres: { $in: userGenres },
+      rating: { $gte: 7 } // Only recommend highly rated movies
+    })
+    .populate('addedBy')
+    .sort({ rating: -1 })
+    .limit(12);
+    
+    res.render('movies/recommendations', {
+      movies: recommendations,
+      userGenres: userGenres,
+      pageTitle: 'Recommendations'
+    });
+  } catch (error) {
+    console.error('Error fetching recommendations:', error);
+    res.render('movies/recommendations', {
+      movies: [],
+      userGenres: [],
+      pageTitle: 'Recommendations'
+    });
   }
 });
 

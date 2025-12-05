@@ -19,6 +19,64 @@
     <% } %>
 </div>
 
+<!-- Recommendations Section -->
+<% if (user && typeof recommendations !== 'undefined' && recommendations.length > 0) { %>
+    <div class="recommendations-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-magic"></i> Recommended for You
+            </h2>
+            <p class="section-subtitle">Based on your movie preferences</p>
+        </div>
+        
+        <div class="movies-grid">
+            <% recommendations.forEach(movie => { %>
+                <div class="card movie-card recommendation-card">
+                    <div class="recommendation-badge">
+                        <i class="fas fa-star"></i> Recommended
+                    </div>
+                    <div class="card-body">
+                        <h3 class="movie-title"><%= movie.name %></h3>
+                        <div class="movie-meta">
+                            <%= movie.year %> • <%= movie.director %>
+                        </div>
+                        <div class="movie-description">
+                            <%= movie.description.substring(0, 100) %>...
+                        </div>
+                        <div class="genres">
+                            <% movie.genres.forEach(genre => { %>
+                                <a href="/movies/genre/<%= encodeURIComponent(genre) %>" class="badge genre-link">
+                                    <%= genre %>
+                                </a>
+                            <% }) %>
+                        </div>
+                        <div class="rating">
+                            <div class="rating-score">
+                                <i class="fas fa-star"></i> <%= movie.rating %>/10
+                            </div>
+                            <div class="added-by">by <%= movie.addedBy.username %></div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="/movies/<%= movie._id %>" class="btn btn-outline btn-sm">View Details</a>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+<% } %>
+
+<!-- All Movies Section -->
+<% if (typeof recommendations !== 'undefined' && recommendations.length > 0) { %>
+    <div class="all-movies-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-film"></i> All Movies
+            </h2>
+        </div>
+    </div>
+<% } %>
+
 <% if (movies.length === 0) { %>
     <div class="empty-state">
         <i class="fas fa-film"></i>

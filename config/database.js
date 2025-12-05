@@ -2,17 +2,27 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
+
+    // Close existing connections
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // Remove deprecated options
-      maxPoolSize: process.env.DB_MAX_POOL_SIZE || 10,
-      serverSelectionTimeoutMS: process.env.DB_SERVER_SELECTION_TIMEOUT || 5000,
-      socketTimeoutMS: 45000,
-      // Removed: useNewUrlParser, useUnifiedTopology, bufferCommands, bufferMaxEntries
+      maxPoolSize: parseInt(process.env.DB_MAX_POOL_SIZE) || 5,
+      serverSelectionTimeoutMS: parseInt(process.env.DB_SERVER_SELECTION_TIMEOUT) || 10000,
+      socketTimeoutMS: 30000,
+      connectTimeoutMS: 10000,
+      maxIdleTimeMS: 30000,
+      retryWrites: true,
+      w: 'majority'
     });
 
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
     
-    // Handle connection events
     mongoose.connection.on('error', (err) => {
       console.error('MongoDB connection error:', err);
     });
@@ -21,15 +31,17 @@ const connectDB = async () => {
       console.log('MongoDB disconnected');
     });
 
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed through app termination');
-      process.exit(0);
+    mongoose.connection.on('reconnected', () => {
+      console.log('MongoDB reconnected');
     });
 
+    return conn;
   } catch (error) {
-    console.error('Database connection failed:', error);
-    process.exit(1);
+    console.error('Database connection failed:', error.message);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 

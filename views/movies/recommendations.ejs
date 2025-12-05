@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-magic"></i> Recommended for You
+    </h1>
+    <p class="page-subtitle">Discover movies tailored to your taste</p>
+    <a href="/movies" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to All Movies
+    </a>
+</div>
+
+<% if (typeof movies !== 'undefined' && movies.length > 0) { %>
+    <div class="movies-grid">
+        <% movies.forEach(movie => { %>
+            <div class="card movie-card">
+                <div class="card-body">
+                    <h3 class="movie-title"><%= movie.name %></h3>
+                    <div class="movie-meta">
+                        <%= movie.year %> • <%= movie.director %>
+                    </div>
+                    <div class="movie-description">
+                        <%= movie.description.substring(0, 100) %>...
+                    </div>
+                    <div class="genres">
+                        <% movie.genres.forEach(genre => { %>
+                            <a href="/movies/genre/<%= encodeURIComponent(genre) %>" class="badge genre-link">
+                                <%= genre %>
+                            </a>
+                        <% }) %>
+                    </div>
+                    <div class="rating">
+                        <div class="rating-score">
+                            <i class="fas fa-star"></i> <%= movie.rating %>/10
+                        </div>
+                        <div class="added-by">by <%= movie.addedBy.username %></div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/movies/<%= movie._id %>" class="btn btn-outline btn-sm">View Details</a>
+                    <% if (user && user._id === movie.addedBy._id.toString()) { %>
+                        <a href="/movies/<%= movie._id %>/edit" class="btn btn-warning btn-sm">Edit</a>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+<% } else { %>
+    <div class="empty-state">
+        <i class="fas fa-magic"></i>
+        <h3>No recommendations available</h3>
+        <p>Add more movies to get personalized recommendations!</p>
+        <% if (user) { %>
+            <a href="/movies/add" class="btn btn-primary mt-3">Add a Movie</a>
+        <% } %>
+    </div>
+<% } %>
+
+<%- include('../partials/footer') %>
