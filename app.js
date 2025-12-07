@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const methodOverride = require('method-override');
 const path = require('path');
+const mongoose = require('mongoose');
 
 // Load environment variables
 require('dotenv').config();
@@ -47,6 +48,20 @@ app.use(session({
     httpOnly: true
   }
 }));
+
+// Database connection check middleware
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    console.log('Database disconnected, attempting reconnection...');
+    try {
+      await connectDB();
+    } catch (error) {
+      console.error('Failed to reconnect to database:', error);
+      return res.status(503).send('Database connection unavailable');
+    }
+  }
+  next();
+});
 
 // Make user available in all templates
 app.use((req, res, next) => {
